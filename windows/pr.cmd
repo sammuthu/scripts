@@ -21,7 +21,7 @@ rem Get the name of the currently checked out branch
 for /f "delims=" %%a in ('git rev-parse --abbrev-ref HEAD') do set current_branch=%%a
 
 rem Get the URL of the remote repository for the current branch
-for /f "delims=" %%a in ('git remote get-url --push origin') do set repo_url=%%a
+for /f "delims=" %%b in ('git remote get-url --push origin') do set repo_url=%%b
 
 echo The URL of the remote repository for branch !current_branch! is !repo_url!
 
