@@ -15,13 +15,15 @@ git push origin %current_branch%:%origin_branch% --force
 rem
 
 
+setlocal EnableDelayedExpansion
+
 rem Get the name of the currently checked out branch
-for /f "delims=" %%i in ('git rev-parse --abbrev-ref HEAD') do set current_branch=%%i
+for /f "delims=" %%a in ('git rev-parse --abbrev-ref HEAD') do set current_branch=%%a
 
 rem Get the URL of the remote repository for the current branch
-for /f "delims=" %%i in ('git remote get-url --push origin') do set repo_url=%%i
+for /f "delims=" %%a in ('git remote get-url --push origin') do set repo_url=%%a
 
-echo The URL of the remote repository for branch %current_branch% is %repo_url%
+echo The URL of the remote repository for branch !current_branch! is !repo_url!
 
 
 rem
