@@ -1,35 +1,30 @@
-public class AccountTest {
+@Test
+    void testAction() {
+        String actionType = "CREATE";
+        String actionDateTime = "2021-01-01T00:00:00Z";
 
-    @Test
-    public void testAccount() {
-        String accountNumber = "123456";
-        String accountCompanyNumber = "78910";
-        String accountProductCode = "ABC";
-
-        Account account = Account.builder()
-                .accountNumber(accountNumber)
-                .accountCompanyNumber(accountCompanyNumber)
-                .accountProductCode(accountProductCode)
+        Action action = Action.builder()
+                .actionType(actionType)
+                .actionDateTime(actionDateTime)
                 .build();
 
-        assertEquals(accountNumber, account.getAccountNumber());
-        assertEquals(accountCompanyNumber, account.getAccountCompanyNumber());
-        assertEquals(accountProductCode, account.getAccountProductCode());
+        assertEquals(actionType, action.getActionType());
+        assertEquals(actionDateTime, action.getActionDateTime());
 
         // Test setters
-        account.setAccountNumber("654321");
-        assertEquals("654321", account.getAccountNumber());
+        action.setActionType("UPDATE");
+        assertEquals("UPDATE", action.getActionType());
 
         // Test toString
-        assertTrue(account.toString().contains("654321"));
+        assertTrue(action.toString().contains("UPDATE"));
 
         // Test equals and hashCode
-        Account account2 = new Account("654321", accountCompanyNumber, accountProductCode);
-        assertEquals(account, account2);
-        assertEquals(account.hashCode(), account2.hashCode());
+        Action action2 = new Action("UPDATE", actionDateTime);
+        assertEquals(action, action2);
+        assertEquals(action.hashCode(), action2.hashCode());
 
         // Test not equals and different hashCode
-        Account account3 = new Account("111111", accountCompanyNumber, accountProductCode);
-        assertNotEquals(account, account3);
-        assertNotEquals(account.hashCode(), account3.hashCode());
+        Action action3 = new Action("DELETE", actionDateTime);
+        assertNotEquals(action, action3);
+        assertNotEquals(action.hashCode(), action3.hashCode());
     }
