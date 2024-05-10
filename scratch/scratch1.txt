@@ -1,30 +1,33 @@
 @Test
-    void testAction() {
-        String actionType = "CREATE";
-        String actionDateTime = "2021-01-01T00:00:00Z";
+    void testActivity() {
+        String transactionKey = "123";
+        String applicationReferenceNumber = "456";
 
-        Action action = Action.builder()
-                .actionType(actionType)
-                .actionDateTime(actionDateTime)
+        // Test Builder and AllArgsConstructor
+        Activity activity1 = Activity.builder()
+                .transactionKey(transactionKey)
+                .applicationReferenceNumber(applicationReferenceNumber)
                 .build();
 
-        assertEquals(actionType, action.getActionType());
-        assertEquals(actionDateTime, action.getActionDateTime());
+        assertEquals(transactionKey, activity1.getTransactionKey());
+        assertEquals(applicationReferenceNumber, activity1.getApplicationReferenceNumber());
+
+        // Test NoArgsConstructor
+        Activity activity2 = new Activity();
+        assertNotNull(activity2);
 
         // Test setters
-        action.setActionType("UPDATE");
-        assertEquals("UPDATE", action.getActionType());
+        activity2.setTransactionKey(transactionKey);
+        activity2.setApplicationReferenceNumber(applicationReferenceNumber);
 
-        // Test toString
-        assertTrue(action.toString().contains("UPDATE"));
+        assertEquals(transactionKey, activity2.getTransactionKey());
+        assertEquals(applicationReferenceNumber, activity2.getApplicationReferenceNumber());
 
         // Test equals and hashCode
-        Action action2 = new Action("UPDATE", actionDateTime);
-        assertEquals(action, action2);
-        assertEquals(action.hashCode(), action2.hashCode());
+        assertEquals(activity1, activity2);
+        assertEquals(activity1.hashCode(), activity2.hashCode());
 
-        // Test not equals and different hashCode
-        Action action3 = new Action("DELETE", actionDateTime);
-        assertNotEquals(action, action3);
-        assertNotEquals(action.hashCode(), action3.hashCode());
+        // Test toString
+        assertTrue(activity1.toString().contains(transactionKey));
+        assertTrue(activity1.toString().contains(applicationReferenceNumber));
     }
