@@ -1,0 +1,35 @@
+public class AccountTest {
+
+    @Test
+    public void testAccount() {
+        String accountNumber = "123456";
+        String accountCompanyNumber = "78910";
+        String accountProductCode = "ABC";
+
+        Account account = Account.builder()
+                .accountNumber(accountNumber)
+                .accountCompanyNumber(accountCompanyNumber)
+                .accountProductCode(accountProductCode)
+                .build();
+
+        assertEquals(accountNumber, account.getAccountNumber());
+        assertEquals(accountCompanyNumber, account.getAccountCompanyNumber());
+        assertEquals(accountProductCode, account.getAccountProductCode());
+
+        // Test setters
+        account.setAccountNumber("654321");
+        assertEquals("654321", account.getAccountNumber());
+
+        // Test toString
+        assertTrue(account.toString().contains("654321"));
+
+        // Test equals and hashCode
+        Account account2 = new Account("654321", accountCompanyNumber, accountProductCode);
+        assertEquals(account, account2);
+        assertEquals(account.hashCode(), account2.hashCode());
+
+        // Test not equals and different hashCode
+        Account account3 = new Account("111111", accountCompanyNumber, accountProductCode);
+        assertNotEquals(account, account3);
+        assertNotEquals(account.hashCode(), account3.hashCode());
+    }
