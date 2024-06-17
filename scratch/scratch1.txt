@@ -1,101 +1,70 @@
-void testAction() throws Exception {
-        DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
-        XMLGregorianCalendar actionDateTime1 = datatypeFactory.newXMLGregorianCalendar("2022-01-01T00:00:00Z");
-        XMLGregorianCalendar actionDateTime2 = datatypeFactory.newXMLGregorianCalendar("2023-01-01T00:00:00Z");
+import java.io.IOException;
+import java.io.StringWriter;
+import java.time.Instant;
 
-        Action action1 = new Action("Type1", actionDateTime1);
-        Action action2 = new Action("Type1", actionDateTime1);
-        Action action3 = new Action("Type2", actionDateTime1);
-        Action action4 = new Action("Type1", actionDateTime2);
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-        // Test equals and hashCode with same actionType and actionDateTime
-        assertEquals(action1, action2);
-        assertEquals(action1.hashCode(), action2.hashCode());
+public class InstantTypeAdapterTest {
 
-        // Test equals and hashCode with different actionType
-        assertNotEquals(action1, action3);
-        assertNotEquals(action1.hashCode(), action3.hashCode());
+    private Gson gson;
+    private InstantTypeAdapter instantTypeAdapter;
 
-        // Test equals and hashCode with different actionDateTime
-        assertNotEquals(action1, action4);
-        assertNotEquals(action1.hashCode(), action4.hashCode());
-
-        // Test equals with different class
-        assertNotEquals(action1, new Object());
-
-        // Test equals with null
-        assertNotEquals(action1, null);
-
-        // Test toString
-        assertTrue(action1.toString().contains("Type1"));
-        assertTrue(action1.toString().contains("2022-01-01T00:00:00Z"));
-
-        // Test equals and hashCode with itself
-        assertEquals(action1, action1);
-        assertEquals(action1.hashCode(), action1.hashCode());
-
-        package com.generative.model;
-
-        import org.junit.jupiter.api.Test;
-
-        import javax.xml.datatype.DatatypeFactory;
-        import javax.xml.datatype.XMLGregorianCalendar;
-
-        import static org.junit.jupiter.api.Assertions.*;
-
-        class ActionTest {
-
-            @Test
-            void testAction() throws Exception {
-                DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
-                XMLGregorianCalendar actionDateTime1 = datatypeFactory.newXMLGregorianCalendar("2022-01-01T00:00:00Z");
-                XMLGregorianCalendar actionDateTime2 = datatypeFactory.newXMLGregorianCalendar("2023-01-01T00:00:00Z");
-
-                // Test Builder
-                Action actionBuilder = Action.builder()
-                        .actionType("Type1")
-                        .actionDateTime(actionDateTime1)
-                        .build();
-
-                assertEquals("Type1", actionBuilder.getActionType());
-                assertEquals(actionDateTime1, actionBuilder.getActionDateTime());
-
-                // Test AllArgsConstructor
-                Action actionAllArgsConstructor = new Action("Type2", actionDateTime2);
-
-                assertEquals("Type2", actionAllArgsConstructor.getActionType());
-                assertEquals(actionDateTime2, actionAllArgsConstructor.getActionDateTime());
-
-         Action action1 = new Action("Type1", actionDateTime1);
-                 Action action2 = new Action("Type1", actionDateTime1);
-                 Action action3 = new Action("Type2", actionDateTime1);
-                 Action action4 = new Action("Type1", actionDateTime2);
-
-                 // Test equals and hashCode with same actionType and actionDateTime
-                 assertEquals(action1, action2);
-                 assertEquals(action1.hashCode(), action2.hashCode());
-
-                 // Test equals and hashCode with different actionType
-                 assertNotEquals(action1, action3);
-                 assertNotEquals(action1.hashCode(), action3.hashCode());
-
-                 // Test equals and hashCode with different actionDateTime
-                 assertNotEquals(action1, action4);
-                 assertNotEquals(action1.hashCode(), action4.hashCode());
-
-                 // Test equals with different class
-                 assertNotEquals(action1, new Object());
-
-                 // Test equals with null
-                 assertNotEquals(action1, null);
-
-                 // Test toString
-                 assertTrue(action1.toString().contains("Type1"));
-                 assertTrue(action1.toString().contains("2022-01-01T00:00:00Z"));
-
-                 // Test equals and hashCode with itself
-                 assertEquals(action1, action1);
-                 assertEquals(action1.hashCode(), action1.hashCode());
-            }
-        }
+    @BeforeEach
+    public void setUp() {
+        instantTypeAdapter = new InstantTypeAdapter();
+        gson = new GsonBuilder().registerTypeAdapter(Instant.class, instantTypeAdapter).create();
     }
+
+    @Test
+    public void testSerialize() throws IOException {
+        Instant now = Instant.now();
+        String json = gson.toJson(now, Instant.class);
+
+        // Use JsonWriter for more precise testing
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        instantTypeAdapter.write(jsonWriter, now);
+        jsonWriter.close();
+
+        assertEquals(stringWriter.toString(), json);
+    }
+
+    @Test
+    public void testDeserialize() {
+        Instant now = Instant.now();
+        String json = gson.toJson(now, Instant.class);
+        Instant parsedInstant = gson.fromJson(json, Instant.class);
+        assertEquals(now, parsedInstant);
+    }
+
+    @Test
+    public void testDeserializeInvalidFormat() {
+        String invalidJson = "\"invalid-instant\"";
+        assertThrows(JsonSyntaxException.class, () -> gson.fromJson(invalidJson, Instant.class));
+    }
+}
+
+import com.google.gson.Gson;
+import org.junit.jupiter.api.Test;
+import java.time.Instant;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class GsonConfigurationTest {
+
+    @Test
+    public void testCreateGson() {
+        Gson gson = GsonConfiguration.createGson();
+        assertNotNull(gson);
+
+        Instant now = Instant.now();
+        String json = gson.toJson(now);
+        assertNotNull(json);
+
+        Instant parsedInstant = gson.fromJson(json, Instant.class);
+        assertNotNull(parsedInstant);
+        assertTrue(now.equals(parsedInstant));
+    }
+}
