@@ -1,8 +1,40 @@
+public class InstantTypeAdapter extends TypeAdapter<Instant> {
+
+    @Override
+    public void write(JsonWriter out, Instant value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
+        }
+        out.value(value.toString());
+    }
+
+    @Override
+    public Instant read(JsonReader in) throws IOException {
+        if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
+            in.nextNull();
+            return null;
+        }
+        return Instant.parse(in.nextString());
+    }
+}
+
+
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class InstantTypeAdapterTest {
@@ -31,6 +63,16 @@ public class InstantTypeAdapterTest {
     }
 
     @Test
+    public void testSerializeNull() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        instantTypeAdapter.write(jsonWriter, null);
+        jsonWriter.close();
+
+        assertEquals("null", stringWriter.toString());
+    }
+
+    @Test
     public void testDeserialize() {
         Instant now = Instant.now();
         String json = gson.toJson(now, Instant.class);
@@ -39,32 +81,15 @@ public class InstantTypeAdapterTest {
     }
 
     @Test
+    public void testDeserializeNull() throws IOException {
+        JsonReader jsonReader = new JsonReader(new StringReader("null"));
+        Instant parsedInstant = instantTypeAdapter.read(jsonReader);
+        assertNull(parsedInstant);
+    }
+
+    @Test
     public void testDeserializeInvalidFormat() {
         String invalidJson = "\"invalid-instant\"";
         assertThrows(JsonSyntaxException.class, () -> gson.fromJson(invalidJson, Instant.class));
-    }
-}
-
-import com.google.gson.Gson;
-import org.junit.jupiter.api.Test;
-import java.time.Instant;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-public class GsonConfigurationTest {
-
-    @Test
-    public void testCreateGson() {
-        Gson gson = GsonConfiguration.createGson();
-        assertNotNull(gson);
-
-        Instant now = Instant.now();
-        String json = gson.toJson(now);
-        assertNotNull(json);
-
-        Instant parsedInstant = gson.fromJson(json, Instant.class);
-        assertNotNull(parsedInstant);
-        assertTrue(now.equals(parsedInstant));
     }
 }
