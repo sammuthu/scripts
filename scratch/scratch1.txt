@@ -1,95 +1,19 @@
-public class InstantTypeAdapter extends TypeAdapter<Instant> {
+  // Private constructor to prevent instantiation
+    private GsonConfiguration() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
 
-    @Override
-    public void write(JsonWriter out, Instant value) throws IOException {
-        if (value == null) {
-            out.nullValue();
-            return;
+    @Test
+        public void testPrivateConstructor() throws NoSuchMethodException {
+            Constructor<GsonConfiguration> constructor = GsonConfiguration.class.getDeclaredConstructor();
+            assertTrue(constructor.canAccess(null));
+
+            constructor.setAccessible(true);
+
+            InvocationTargetException thrown = assertThrows(InvocationTargetException.class, () -> {
+                constructor.newInstance();
+            });
+
+            assertTrue(thrown.getCause() instanceof UnsupportedOperationException);
+            assertEquals("This is a utility class and cannot be instantiated", thrown.getCause().getMessage());
         }
-        out.value(value.toString());
-    }
-
-    @Override
-    public Instant read(JsonReader in) throws IOException {
-        if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
-            in.nextNull();
-            return null;
-        }
-        return Instant.parse(in.nextString());
-    }
-}
-
-
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.time.Instant;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-public class InstantTypeAdapterTest {
-
-    private Gson gson;
-    private InstantTypeAdapter instantTypeAdapter;
-
-    @BeforeEach
-    public void setUp() {
-        instantTypeAdapter = new InstantTypeAdapter();
-        gson = new GsonBuilder().registerTypeAdapter(Instant.class, instantTypeAdapter).create();
-    }
-
-    @Test
-    public void testSerialize() throws IOException {
-        Instant now = Instant.now();
-        String json = gson.toJson(now, Instant.class);
-
-        // Use JsonWriter for more precise testing
-        StringWriter stringWriter = new StringWriter();
-        JsonWriter jsonWriter = new JsonWriter(stringWriter);
-        instantTypeAdapter.write(jsonWriter, now);
-        jsonWriter.close();
-
-        assertEquals(stringWriter.toString(), json);
-    }
-
-    @Test
-    public void testSerializeNull() throws IOException {
-        StringWriter stringWriter = new StringWriter();
-        JsonWriter jsonWriter = new JsonWriter(stringWriter);
-        instantTypeAdapter.write(jsonWriter, null);
-        jsonWriter.close();
-
-        assertEquals("null", stringWriter.toString());
-    }
-
-    @Test
-    public void testDeserialize() {
-        Instant now = Instant.now();
-        String json = gson.toJson(now, Instant.class);
-        Instant parsedInstant = gson.fromJson(json, Instant.class);
-        assertEquals(now, parsedInstant);
-    }
-
-    @Test
-    public void testDeserializeNull() throws IOException {
-        JsonReader jsonReader = new JsonReader(new StringReader("null"));
-        Instant parsedInstant = instantTypeAdapter.read(jsonReader);
-        assertNull(parsedInstant);
-    }
-
-    @Test
-    public void testDeserializeInvalidFormat() {
-        String invalidJson = "\"invalid-instant\"";
-        assertThrows(JsonSyntaxException.class, () -> gson.fromJson(invalidJson, Instant.class));
-    }
-}
